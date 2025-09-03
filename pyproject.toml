@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-parade"
+version = "1.0.0"
+requires-python = ">= 3.12.1"
+dependencies = [
+  "Flask>=3.1.2",
+]
+description = "A data API used for the NASA project \"Will it rain on my parade?\""
+authors = [
+  {name = "Débora Hellen Veras Paiva", email = "deborahellenvp@gmail.com"},
+  {name = "Helza Batista Aragão", email = "helza.batista.aragao@gmail.com"},
+  {name = "Henrique Barbosa", email = "henribdev@gmail.com"},
+  {name = "Jaiane de Barros Soares", email = "jaianesoares700@gmail.com"},
+  {name = "Luiz Guilherme Mariano da Cruz", email = "marianoluizguilherme2@gmail.com"},
+  {name = "Matheus Silva Bezerra", email = "matheussbzp@gmail.com"}
+]
+readme = "README.md"
+license = "MIT"
+license-files = ["LICEN[CS]E.*"]

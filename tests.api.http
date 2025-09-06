@@ -1,0 +1,49 @@
+@base = http://127.0.0.1:5000/api/v1
+@origin = http://localhost:8080
+@lat = -23.55
+@lon = -46.63
+
+### CORS preflight
+OPTIONS {{base}}/health
+Origin: {{origin}}
+Access-Control-Request-Method: GET
+
+### Health
+GET {{base}}/health
+Origin: {{origin}}
+Accept: application/json
+
+### Precip OK
+GET {{base}}/risk/precip?lat={{lat}}&lon={{lon}}
+Origin: {{origin}}
+Accept: application/json
+
+### Precip 400 – missing lon
+GET {{base}}/risk/precip?lat={{lat}}
+Origin: {{origin}}
+Accept: application/json
+
+### Precip 400 – invalid lat
+GET {{base}}/risk/precip?lat=123&lon={{lon}}
+Origin: {{origin}}
+Accept: application/json
+
+### Wind OK
+GET {{base}}/risk/wind?lat={{lat}}&lon={{lon}}
+Origin: {{origin}}
+Accept: application/json
+
+### Heat OK
+GET {{base}}/risk/heat?lat={{lat}}&lon={{lon}}
+Origin: {{origin}}
+Accept: application/json
+
+### Lightning OK (proxy)
+GET {{base}}/risk/lightning?lat={{lat}}&lon={{lon}}
+Origin: {{origin}}
+Accept: application/json
+
+### Air Quality OK (Open-Meteo)
+GET {{base}}/risk/air?lat={{lat}}&lon={{lon}}
+Origin: {{origin}}
+Accept: application/json

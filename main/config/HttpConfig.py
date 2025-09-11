@@ -17,7 +17,7 @@ class HttpConfig:
     def create_session():
         session = requests.Session()
         session.headers.update({
-            "User-Agent": "NasaDataParade/1.0",
+            "User-Agent": "nasa-data-parade/1.0",
             "Accept": "application/json",
         })
         adapter = HTTPAdapter(max_retries=Retry(
@@ -27,5 +27,4 @@ class HttpConfig:
             allowed_methods=["GET"]
         ))
         session.mount("https://", adapter)
-        session.mount("http://", adapter)
         return session

@@ -2,13 +2,13 @@ from flask import current_app
 
 from main.config.HttpConfig import HttpConfig
 
-class OpenMeteoHttpContext:
+class GeocodeHttpContext:
 
     base_url = None
 
     def __init__(self):
         self.session = HttpConfig.create_session()
-        self.base_url = current_app.config.get("OPEN_METEO_API_URL")
+        self.base_url = current_app.config.get("GEOCODE_API_URL")
 
     def get(self, params):
         response = self.session.get(

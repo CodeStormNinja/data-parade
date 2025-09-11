@@ -15,6 +15,7 @@ class Config:
     
     # EXTERNAL SERVICES
     OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast"
+    GEOCODE_API_URL = "https://nominatim.openstreetmap.org/search"
     
     # HEALTH-CHECK
     APPLICATION_STARTED_AT_UTC = None

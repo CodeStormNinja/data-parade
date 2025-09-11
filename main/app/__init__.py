@@ -30,7 +30,6 @@ def create_app():
     from .resources.risk_heat import RiskHeatResource
     from .resources.risk_lightning import RiskLightningResource
     from .resources.risk_air import RiskAirResource
-    from .resources.geocode import GeocodeResource
     from .errors import register_error_handlers
 
     api.add_resource(RiskPrecipResource, "/risk/precip")
@@ -38,7 +37,6 @@ def create_app():
     api.add_resource(RiskHeatResource, "/risk/heat")
     api.add_resource(RiskLightningResource, "/risk/lightning")
     api.add_resource(RiskAirResource, "/risk/air")
-    api.add_resource(GeocodeResource, "/utils/geocode")
 
     app.register_blueprint(api_bp)
     return app

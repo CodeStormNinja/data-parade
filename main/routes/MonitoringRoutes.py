@@ -3,8 +3,9 @@ from flask import current_app
 import time
 import requests
 
-from main.common.utils.ClassUtils import ClassUtils
+from main.common.decorators.InstanceDecorators import Singleton
 from main.common.utils.DateTimeUtils import DateTimeUtils
+from main.infrastructure.http.GeocodeHttpContext import GeocodeHttpContext
 from main.infrastructure.http.OpenMeteoHttpContext import OpenMeteoHttpContext
 
 ns = Namespace("health", description="Application Health Check")
@@ -12,9 +13,13 @@ ns = Namespace("health", description="Application Health Check")
 @ns.route("/")
 class HealthCheckResource(Resource):
     
-    @ClassUtils.Singleton
+    @Singleton
     def _open_meteo_http_context(self):
         return OpenMeteoHttpContext()
+    
+    @Singleton
+    def _geocode_http_context(self):
+        return GeocodeHttpContext()
     
     def get(self):
         
@@ -29,22 +34,18 @@ class HealthCheckResource(Resource):
         }
             
         deps = {}
-        try:
-            t0 = time.perf_counter()
-            self._open_meteo_http_context.get(params={
-                "latitude": 0, "longitude": 0,
-                "hourly": "temperature_2m",
-                "forecast_days": 1, "timezone": "UTC"
-            })
-            deps["open_meteo"] = {
-                "status": "ok",
-                "latency_ms": round((time.perf_counter() - t0) * 1000, 1)
-            }
-        except Exception as e:
-            deps["open_meteo"] = {
-                "status": "fail", 
-                "error": type(e).__name__
-            }
+        
+        deps["open_meteo"] = self._test_external_service(self._open_meteo_http_context, "get", params={
+            "latitude": 0, "longitude": 0,
+            "hourly": "temperature_2m",
+            "forecast_days": 1, "timezone": "UTC"
+        })
+        
+        deps["geocode"] = self._test_external_service(self._geocode_http_context, "get", params={
+            "q": "United States", 
+            "format": "json", 
+            "limit": 1
+        })
 
         info["deps"] = deps
         
@@ -55,6 +56,21 @@ class HealthCheckResource(Resource):
 
         result_status_code = 200 if info["status"] == "ok" else 503
         return info, result_status_code
+    
+    def _test_external_service(self, context, method_name, params):
+        method = getattr(context, method_name)
+        try:
+            t0 = time.perf_counter()
+            method(params=params)
+            return {
+                "status": "ok",
+                "latency_ms": round((time.perf_counter() - t0) * 1000, 1)
+            }
+        except Exception as e:
+            return {
+                "status": "fail", 
+                "error": type(e).__name__
+            }
 
 """
 /health — Health check da API
@@ -73,6 +89,11 @@ Resposta (200 OK)
   "uptime_s": 123.4,              # Segundos desde a inicialização
   "deps": {                       # Dependências externas
     "open_meteo": { 
+        "status": "ok|fail", 
+        "latency_ms": 123.4,
+        "error": "Timeout" 
+    },
+    "geocode": { 
         "status": "ok|fail", 
         "latency_ms": 123.4,
         "error": "Timeout" 

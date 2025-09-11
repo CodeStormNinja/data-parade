@@ -1,15 +1,11 @@
 from flask import Flask, Blueprint
 from flask_cors import CORS
 from flask_restful import Api
-import time
-from datetime import datetime, timezone
 
 def create_app():
     app = Flask(__name__)
     app.config["BUNDLE_ERRORS"] = True
     app.config["ERROR_404_HELP"] = False
-    app.config["STARTED_AT_UTC"] = datetime.now(timezone.utc).isoformat().replace("+00:00","Z")
-    app.config["STARTED_AT_TS"] = time.time()
 
     CORS(app, resources={
         r"/api/*": {
@@ -29,7 +25,6 @@ def create_app():
     api_bp = Blueprint("api", __name__, url_prefix="/api/v1")
     api = Api(api_bp)
 
-    from .resources.health import HealthResource
     from .resources.risk_precip import RiskPrecipResource
     from .resources.risk_wind import RiskWindResource
     from .resources.risk_heat import RiskHeatResource
@@ -38,7 +33,6 @@ def create_app():
     from .resources.geocode import GeocodeResource
     from .errors import register_error_handlers
 
-    api.add_resource(HealthResource, "/health")
     api.add_resource(RiskPrecipResource, "/risk/precip")
     api.add_resource(RiskWindResource, "/risk/wind")
     api.add_resource(RiskHeatResource, "/risk/heat")

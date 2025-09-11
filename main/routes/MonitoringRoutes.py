@@ -3,18 +3,22 @@ from flask import current_app
 import time
 import requests
 
+from main.common.utils.ClassUtils import ClassUtils
 from main.common.utils.DateTimeUtils import DateTimeUtils
+from main.infrastructure.http.OpenMeteoHttpContext import OpenMeteoHttpContext
 
 ns = Namespace("health", description="Application Health Check")
 
 @ns.route("/")
 class HealthCheckResource(Resource):
     
+    @ClassUtils.Singleton
+    def _open_meteo_http_context(self):
+        return OpenMeteoHttpContext()
+    
     def get(self):
         
         app_started_at_utc = current_app.config.get("APPLICATION_STARTED_AT_UTC")
-        open_meteo_url = current_app.config.get("OPEN_METEO_API_URL")
-        open_meteo_timeout = current_app.config.get("OPEN_METEO_TIMEOUT_SECS")
 
         info = {
             "status": "ok",
@@ -27,16 +31,11 @@ class HealthCheckResource(Resource):
         deps = {}
         try:
             t0 = time.perf_counter()
-            r = requests.get(
-                open_meteo_url,
-                params={
-                    "latitude": 0, "longitude": 0,
-                    "hourly": "temperature_2m",
-                    "forecast_days": 1, "timezone": "UTC"
-                },
-                timeout=float(open_meteo_timeout)
-            )
-            r.raise_for_status()
+            self._open_meteo_http_context.get(params={
+                "latitude": 0, "longitude": 0,
+                "hourly": "temperature_2m",
+                "forecast_days": 1, "timezone": "UTC"
+            })
             deps["open_meteo"] = {
                 "status": "ok",
                 "latency_ms": round((time.perf_counter() - t0) * 1000, 1)

@@ -19,6 +19,7 @@ class HealthCheckResource(Resource):
         app_started_at_utc = current_app.config.get("APPLICATION_STARTED_AT_UTC")
         geocode_api_url = current_app.config.get("GEOCODE_API_URL")
         weather_forecast_api_url = current_app.config.get("OPEN_METEO_API_URL")
+        weather_forecast_air_quality_api_url = current_app.config.get("OPEN_METEO_AIR_QUALITY_API_URL")
 
         info = {
             "status": "ok",
@@ -33,6 +34,12 @@ class HealthCheckResource(Resource):
         deps["open_meteo"] = self._test_external_service(weather_forecast_api_url + "/v1/forecast", "get", params={
             "latitude": 0, "longitude": 0,
             "hourly": "temperature_2m",
+            "forecast_days": 1, "timezone": "UTC"
+        })
+        
+        deps["open_meteo_air_quality"] = self._test_external_service(weather_forecast_air_quality_api_url + "/v1/air-quality", "get", params={
+            "latitude": 0, "longitude": 0,
+            "hourly": "pm10",
             "forecast_days": 1, "timezone": "UTC"
         })
         

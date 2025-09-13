@@ -1,10 +1,10 @@
 from flask import Flask
 from flask_restx import Api
 
-from main.common.utils.DateTimeUtils import DateTimeUtils
+from main.common.utils import DateTimeUtils
 from main.config.Config import Config
-from main.routes.MonitoringRoutes import ns as monitoring_ns
-from main.routes.WeatherForecastRoutes import ns as weather_forecast_ns
+from main.api.routes.MonitoringRoutes import ns as monitoring_ns
+from main.api.routes.WeatherForecastRoutes import ns as weather_forecast_ns
 
 def create_app():
     

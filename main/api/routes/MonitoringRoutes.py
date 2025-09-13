@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource
 from flask import current_app
 import time
 
-from main.common.utils.DateTimeUtils import DateTimeUtils
+from main.common.utils import DateTimeUtils
 from main.infrastructure.http.HttpContext import HttpContext
 
 ns = Namespace("health", description="Application Health Check")
@@ -12,6 +12,7 @@ class HealthCheckResource(Resource):
     
     def __init__(self, api):
         self._http_context = HttpContext()
+        super().__init__(api)
     
     def get(self):
         

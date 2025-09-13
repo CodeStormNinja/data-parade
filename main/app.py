@@ -12,6 +12,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config())
     app.config.from_object(Config.get_environment_config())
+    app.config["APPLICATION_STARTED_AT_UTC"] = DateTimeUtils.utc_now_iso()
     
     # SWAGGER
     api = Api(
@@ -25,7 +26,5 @@ def create_app():
     # ROUTES
     api.add_namespace(monitoring_ns)
     api.add_namespace(weather_forecast_ns)
-    
-    app.config["APPLICATION_STARTED_AT_UTC"] = DateTimeUtils.utc_now_iso()
 
     return app

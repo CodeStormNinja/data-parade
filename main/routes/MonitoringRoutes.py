@@ -1,29 +1,23 @@
 from flask_restx import Namespace, Resource
 from flask import current_app
 import time
-import requests
 
-from main.common.decorators.InstanceDecorators import Singleton
 from main.common.utils.DateTimeUtils import DateTimeUtils
-from main.infrastructure.http.GeocodeHttpContext import GeocodeHttpContext
-from main.infrastructure.http.OpenMeteoHttpContext import OpenMeteoHttpContext
+from main.infrastructure.http.HttpContext import HttpContext
 
 ns = Namespace("health", description="Application Health Check")
 
 @ns.route("/")
 class HealthCheckResource(Resource):
     
-    @Singleton
-    def _open_meteo_http_context(self):
-        return OpenMeteoHttpContext()
-    
-    @Singleton
-    def _geocode_http_context(self):
-        return GeocodeHttpContext()
+    def __init__(self, api):
+        self._http_context = HttpContext()
     
     def get(self):
         
         app_started_at_utc = current_app.config.get("APPLICATION_STARTED_AT_UTC")
+        geocode_api_url = current_app.config.get("GEOCODE_API_URL")
+        weather_forecast_api_url = current_app.config.get("OPEN_METEO_API_URL")
 
         info = {
             "status": "ok",
@@ -35,13 +29,13 @@ class HealthCheckResource(Resource):
             
         deps = {}
         
-        deps["open_meteo"] = self._test_external_service(self._open_meteo_http_context, "get", params={
+        deps["open_meteo"] = self._test_external_service(weather_forecast_api_url + "/v1/forecast", "get", params={
             "latitude": 0, "longitude": 0,
             "hourly": "temperature_2m",
             "forecast_days": 1, "timezone": "UTC"
         })
         
-        deps["geocode"] = self._test_external_service(self._geocode_http_context, "get", params={
+        deps["geocode"] = self._test_external_service(geocode_api_url + "/search", "get", params={
             "q": "United States", 
             "format": "json", 
             "limit": 1
@@ -57,11 +51,11 @@ class HealthCheckResource(Resource):
         result_status_code = 200 if info["status"] == "ok" else 503
         return info, result_status_code
     
-    def _test_external_service(self, context, method_name, params):
-        method = getattr(context, method_name)
+    def _test_external_service(self, url, method_name, params):
+        method = getattr(self._http_context, method_name)
         try:
             t0 = time.perf_counter()
-            method(params=params)
+            method(url=url, params=params)
             return {
                 "status": "ok",
                 "latency_ms": round((time.perf_counter() - t0) * 1000, 1)

@@ -1,20 +1,16 @@
 from flask import current_app
 
-from main.config.HttpConfig import HttpConfig
+from main.infrastructure.http.HttpContext import HttpContext
 
 class GeocodeHttpContext:
 
-    base_url = None
-
     def __init__(self):
-        self.session = HttpConfig.create_session()
-        self.base_url = current_app.config.get("GEOCODE_API_URL")
+        self._base_url = current_app.config.get("GEOCODE_API_URL")
+        self._http_context = HttpContext()
 
-    def get(self, params):
-        response = self.session.get(
-            self.base_url,
-            params=params,
-            timeout=HttpConfig.get_default_timeout()
-        )
-        response.raise_for_status()
-        return response.json()
+    def get_coordinates_by_location_name(self, location_name):
+        return self._http_context.get(self._base_url + "/search", params={
+            "q": location_name, 
+            "format": "json", 
+            "limit": 1
+        })
